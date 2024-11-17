@@ -1,0 +1,154 @@
+$primary-10: #f7f2ee !default;
+$primary-20: #faf7f5 !default;
+$primary-40: #f1eae4 !default;
+$primary-60: #e1d1c2 !default;
+$primary-80: #d0b79f !default;
+$primary-100: #bf9d7d !default;
+$primary-120: #7b6651 !default;
+
+$primary-colors: (
+  "primary-10": $primary-10,
+  "primary-20": $primary-20,
+  "primary-40": $primary-40,
+  "primary-60": $primary-60,
+  "primary-80": $primary-80,
+  "primary-100": $primary-100,
+  "primary-120": $primary-120,
+) !default;
+
+$success-10: #e8fee7 !default;
+$success-20: #bcfbbd !default;
+$success-100: #52dd7e !default;
+$success-120: #299f65 !default;
+
+$success-colors: (
+  "success-10": $success-10,
+  "success-20": $success-20,
+  "success-100": $success-100,
+  "success-120": $success-120,
+) !default;
+
+$info-10: #e6fbfe !default;
+$info-20: #b1effd !default;
+$info-100: #3badef !default;
+$info-120: #1d66ac !default;
+
+$info-colors: (
+  "info-10": $info-10,
+  "info-20": $info-20,
+  "info-100": $info-100,
+  "info-120": $info-120,
+) !default;
+
+$alert-10: #fdecef !default;
+$alert-20: #f5ccd1 !default;
+$alert-100: #da3e51 !default;
+$alert-120: #c22538 !default;
+
+$alert-colors: (
+  "alert-10": $alert-10,
+  "alert-20": $alert-20,
+  "alert-100": $alert-100,
+  "alert-120": $alert-120,
+) !default;
+
+$neutral-0: #ffffff !default;
+$neutral-10: #f9f9f9 !default;
+$neutral-40: #ececec !default;
+$neutral-60: #909090 !default;
+$neutral-80: #4b4b4b !default;
+$neutral-100: #000000 !default;
+$neutral-120: #140f0a !default;
+
+$neutral-colors: (
+  "neutral-0": $neutral-0,
+  "neutral-10": $neutral-10,
+  "neutral-40": $neutral-40,
+  "neutral-60": $neutral-60,
+  "neutral-80": $neutral-80,
+  "neutral-100": $neutral-100,
+  "neutral-120": $neutral-120,
+) !default;
+
+$all-colors: map-merge-multiple(
+  $primary-colors,
+  $success-colors,
+  $info-colors,
+  $alert-colors,
+  $neutral-colors
+);
+
+$utilities: map-merge(
+  $utilities,
+  (
+    "color":
+      map-merge(
+        map-get($utilities, "color"),
+        (
+          values:
+            map-merge(
+              map-get(map-get($utilities, "color"), "values"),
+              ($all-colors)
+            ),
+        )
+      ),
+    "background-color":
+      map-merge(
+        map-get($utilities, "background-color"),
+        (
+          values:
+            map-merge(
+              map-get(map-get($utilities, "background-color"), "values"),
+              ($all-colors)
+            ),
+        )
+      ),
+    "border-color":
+      map-merge(
+        map-get($utilities, "border-color"),
+        (
+          values:
+            map-merge(
+              map-get(map-get($utilities, "border-color"), "values"),
+              ($all-colors)
+            ),
+        )
+      ),
+  )
+);
+
+//  color classes for btn
+@each $color, $value in $all-colors {
+  .btn-#{$color} {
+    @include button-variant(
+      $value,
+      $value,
+      $hover-background: shade-color($value, $btn-hover-bg-shade-amount),
+      $hover-border: shade-color($value, $btn-hover-border-shade-amount),
+      $active-background: shade-color($value, $btn-active-bg-shade-amount),
+      $active-border: shade-color($value, $btn-active-border-shade-amount)
+    );
+  }
+}
+
+@each $color, $value in $all-colors {
+  .btn-outline-#{$color} {
+    @include button-outline-variant($value);
+  }
+}
+
+$hover-darken-percentage: 20%;
+
+@mixin hover-darken($color) {
+  &:hover {
+    color: darken($color, $hover-darken-percentage) !important;
+  }
+}
+
+@each $color, $value in $all-colors {
+  .nav-link {
+    &.text-#{$color} {
+      @include hover-darken($value);
+    }
+  }
+}
