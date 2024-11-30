@@ -2,68 +2,81 @@
 const router = useRouter();
 const route = useRoute();
 
-const { data } = await useFetch(
-  `https://nuxr3.zeabur.app/api/v1/rooms/${route.params.id}`,
-  {
-    key: route.params.id, // 以路由參數作為 key
-  }
-);
-// 串接 API 取得房型詳細資料
-// API path : https://nuxr3.zeabur.app/api/v1/rooms/{id}
-// 將資料渲染至下方的 div.room-page 區塊
+const { id } = route.params;
+
+const { data: roomList } = await useFetch(`/rooms/${id}`, {
+  baseURL: "https://nuxr3.zeabur.app/api/v1",
+  transform: (response) => {
+    const { result } = response || {};
+    return result;
+  },
+  onResponseError({ response }) {
+    const { message } = response._data;
+    console.error("Error", message);
+    router.push("/");
+  },
+});
+
+useSeoMeta({
+  title: () => `Freyja | ${ roomList.value.name }`,
+  description: () => `${ roomList.value.description }`,
+  ogTitle: () => `Freyja | ${ roomList.value.name }`,
+  ogDescription: () => `${ roomList.value.description }`,
+  ogImage: () => `${ roomList.value.imageUrl }`,
+  ogUrl: () => `https://freyja.travel.com.tw/room/${ roomList.value.id }`,
+  twitterCard: "summary_large_image",
+  twitterTitle: () => `Freyja | ${ roomList.value.name }`,
+  twitterDescription: () => `${ roomList.value.description }`,
+  twitterImage: () => `${ roomList.value.imageUrl }`,
+});
+
 </script>
 
 <template>
   <h2>客房詳細頁面</h2>
   <div class="container">
-    <button @click="router.go(-1)">回上一頁</button>
+    <button @click="router.go(-1)" class="btn btn-primary">回上一頁</button>
     <div class="row justify-content-center">
       <div class="col-md-6">
         <div class="room-page">
           <div class="room-header">
-            <h1 class="room-name">{{ data.result.name }}</h1>
+            <h1 class="room-name">{{ roomList.name }}</h1>
             <p class="room-description">
-              {{ data.result.description }}
+              {{ roomList.description }}
             </p>
           </div>
 
           <div class="room-gallery">
             <img
-              :src="data.result.imageUrl"
-              alt="主圖"
+              :src="roomList.imageUrl"
+              :alt="roomList.name"
               class="room-main-image"
             />
-            <div class="room-image-list">
-              <img :src="data.result.imageUrlList[0]" alt="圖片2" />
-              <img :src="data.result.imageUrlList[1]" alt="圖片3" />
-              <img :src="data.result.imageUrlList[2]" alt="圖片4" />
-              <img :src="data.result.imageUrlList[3]" alt="圖片5" />
-            </div>
+            <ul class="room-image-list">
+              <li v-for="(imageUrl, index) in roomList.imageUrlList">
+                <img
+                  :src="imageUrl"
+                  :alt="`${roomList.name}圖片${index + 1}`"
+                />
+              </li>
+            </ul>
           </div>
 
           <div class="room-info">
             <div class="info-block">
               <h2>房間資訊</h2>
-              <p>面積: {{ data.result.areaInfo }}</p>
-              <p>床型: {{ data.result.bedInfo }}</p>
-              <p>最多容納人數: {{ data.result.maxPeople }}</p>
-              <p>價格: {{ data.result.price }}</p>
+              <p>面積: {{ roomList.areaInfo }}</p>
+              <p>床型: {{ roomList.bedInfo }}</p>
+              <p>最多容納人數: {{ roomList.maxPeople }}</p>
+              <p>價格: {{ roomList.price }}</p>
             </div>
 
             <div class="info-block">
               <h2>房間配置</h2>
               <ul>
-                <li>
-                  {{ data.result.layoutInfo[0].title }}:
-                  {{ data.result.layoutInfo[0].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  獨立衛浴:
-                  {{ data.result.layoutInfo[1].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  樓層電梯:
-                  {{ data.result.layoutInfo[2].isProvide ? "提供" : "不提供" }}
+                <li v-for="layout in roomList.layoutInfo" :key="layout.title">
+                  {{ layout.title }}:
+                  {{ layout.isProvide ? "提供" : "不提供" }}
                 </li>
               </ul>
             </div>
@@ -71,47 +84,12 @@ const { data } = await useFetch(
             <div class="info-block">
               <h2>房內設施</h2>
               <ul>
-                <li>
-                  平面電視:
-                  {{
-                    data.result.facilityInfo[0].isProvide ? "提供" : "不提供"
-                  }}
-                </li>
-                <li>
-                  吹風機:
-                  {{
-                    data.result.facilityInfo[1].isProvide ? "提供" : "不提供"
-                  }}
-                </li>
-                <li>
-                  冰箱:
-                  {{
-                    data.result.facilityInfo[2].isProvide ? "提供" : "不提供"
-                  }}
-                </li>
-                <li>
-                  熱水壺:
-                  {{
-                    data.result.facilityInfo[3].isProvide ? "提供" : "不提供"
-                  }}
-                </li>
-                <li>
-                  檯燈:
-                  {{
-                    data.result.facilityInfo[4].isProvide ? "提供" : "不提供"
-                  }}
-                </li>
-                <li>
-                  衣櫥:
-                  {{
-                    data.result.facilityInfo[5].isProvide ? "提供" : "不提供"
-                  }}
-                </li>
-                <li>
-                  書桌:
-                  {{
-                    data.result.facilityInfo[6].isProvide ? "提供" : "不提供"
-                  }}
+                <li
+                  v-for="facility in roomList.facilityInfo"
+                  :key="facility.title"
+                >
+                  {{ facility.title }}:
+                  {{ facility.isProvide ? "提供" : "不提供" }}
                 </li>
               </ul>
             </div>
@@ -119,33 +97,12 @@ const { data } = await useFetch(
             <div class="info-block">
               <h2>客房備品</h2>
               <ul>
-                <li>
-                  衛生紙:
-                  {{ data.result.amenityInfo[0].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  拖鞋:
-                  {{ data.result.amenityInfo[1].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  沐浴用品:
-                  {{ data.result.amenityInfo[2].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  刮鬍刀:
-                  {{ data.result.amenityInfo[3].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  刷牙用品:
-                  {{ data.result.amenityInfo[4].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  罐裝水:
-                  {{ data.result.amenityInfo[5].isProvide ? "提供" : "不提供" }}
-                </li>
-                <li>
-                  梳子:
-                  {{ data.result.amenityInfo[6].isProvide ? "提供" : "不提供" }}
+                <li
+                  v-for="amenity in roomList.amenityInfo"
+                  :key="amenity.title"
+                >
+                  {{ amenity.title }}:
+                  {{ roomList.amenityInfo.isProvide ? "提供" : "不提供" }}
                 </li>
               </ul>
             </div>

@@ -10,11 +10,11 @@
 @import "bootstrap/scss/root";
 @import "bootstrap/scss/reboot";
 
-@import "/assets/stylesheets/custom";
-
 @import "bootstrap/scss/containers";
 @import "bootstrap/scss/buttons";
 
 @import "bootstrap/scss/utilities";
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/utilities/api";
+
+@import "/assets/stylesheets/custom";
